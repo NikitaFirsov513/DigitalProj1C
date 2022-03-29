@@ -1,0 +1,131 @@
+    
+    var g_attrs = [];
+
+    function processNode(node)
+    {
+        if (node.id)
+        {
+            var ids = node.id.split(",");
+
+            var isequal = false;
+            var is1cnode = false;
+
+            var isdebug = g_attrs.length == 0;
+            var debugcolor = "";
+
+            for (var i = 0; i < ids.length; i++)
+            {
+                if (is1cnode || 
+                    (ids[i] == "ENTERPRISE") ||  
+                    (ids[i] == "MNG_ENTERPRISE") ||
+                    (ids[i] == "WEB_ENTERPRISE") ||
+                    (ids[i] == "MOB_ENTERPRISE") ||
+                    (ids[i] == "CONFIG"))
+                    is1cnode = true;
+                if (!isdebug)
+                {
+                    for (var j = 0; j < g_attrs.length; j++)
+                    {
+                        if (ids[i] == g_attrs[j])
+                        {
+                            isequal = true;
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    if (debugcolor == "" && ids[i] == "ENTERPRISE")
+                        debugcolor = "#FF9977";
+                    if (debugcolor == "" && ids[i] == "MNG_ENTERPRISE")
+                        debugcolor = "#BB99CC";
+                    if (debugcolor == "" && ids[i] == "WEB_ENTERPRISE")
+                        debugcolor = "#CFCFB0";
+                    if (debugcolor == "" && ids[i] == "MOB_ENTERPRISE")
+                        debugcolor = "#50F080";
+                    if (debugcolor == "" && ids[i] == "CONFIG")
+                        debugcolor = "#C0FFEB";
+                }
+
+                if (isequal)
+                    break;
+            }
+            
+            if (is1cnode && !isdebug)
+            {
+                node.style.backgroundColor = "";
+                node.style.display = isequal ? "" : "none";
+            }
+ 
+            if (is1cnode && isdebug)
+            {
+                node.style.display = "";
+                node.style.backgroundColor = debugcolor;
+            }
+        }
+        
+        var next = node.firstChild;
+        while (next)
+        {
+            processNode(next);
+            next = next.nextSibling;
+        }
+    }
+    
+    function processPage()
+    {
+        processNode(document.body);
+    }
+
+    function changeClient()
+    {
+       if (document.all.clienttype.value == "empty")
+           return;
+
+       if (document.all.clienttype.value == "debug")
+       {
+           g_attrs = [];
+       }
+       else if (document.all.clienttype.value == "client")
+       {
+           g_attrs = ["ENTERPRISE", "MNG_ENTERPRISE"];
+       }
+       else if (document.all.clienttype.value == "mngclient")
+       {
+           g_attrs = ["MNG_ENTERPRISE"];
+       }
+       else if (document.all.clienttype.value == "webclient")
+       {
+           g_attrs = ["WEB_ENTERPRISE"];
+       }
+       else if (document.all.clienttype.value == "mobileclient")
+       {
+           g_attrs = ["MOB_ENTERPRISE"];
+       }
+       else if (document.all.clienttype.value == "config")
+       {
+           g_attrs = ["CONFIG"];
+       }
+
+       processPage();
+       if (document.all.clienttype.firstChild.value == "empty")
+           setTimeout(function() {
+               document.all.clienttype.removeChild(document.all.clienttype.firstChild);
+           }, 100);
+
+    }
+
+    function addControls()
+    {
+        document.write("<SELECT name=clienttype onchange='changeClient();'>");
+        document.write("<OPTION value=empty>-----");
+        document.write("<OPTION value=debug>DEBUG");
+        document.write("<OPTION value=client>CLIENT");
+        document.write("<OPTION value=mngclient>MANAGED CLIENT");
+        document.write("<OPTION value=webclient>WEB CLIENT");
+        document.write("<OPTION value=mobileclient>MOBILE CLIENT");
+        document.write("<OPTION value=config>CONFIG");
+        document.write("</SELECT><BR>");
+    }
+    
+    addControls();
